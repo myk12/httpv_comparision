@@ -66,7 +66,7 @@ class HTTP_COMP:
             axs[i].plot(delay_array, http3_delay, label='http3')
             axs[i].set_title('loss = ' + str(loss) + '%')
             axs[i].set_xlabel('delay (ms)')
-            axs[i].set_ylabel('delay (ms)')
+            axs[i].set_ylabel('completion time (s)')
             axs[i].legend()
         
         plt.savefig('delay_comparision.png')
