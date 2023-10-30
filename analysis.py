@@ -68,6 +68,8 @@ class HTTP_COMP:
             axs[i].set_xlabel('delay (ms)')
             axs[i].set_ylabel('delay (ms)')
             axs[i].legend()
+        
+        plt.savefig('delay_comparision.png')
 
 if __name__ == '__main__':
     # Parse arguments
@@ -78,3 +80,4 @@ if __name__ == '__main__':
 
     http_comp = HTTP_COMP()
     http_comp.load_data(dir=args.dir)
+    http_comp.plot_delay_comparision()
