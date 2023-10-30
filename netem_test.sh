@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script is used to test the network emulation function of netem.
 TEST_OBJECT="speed-test-medium.html"
-TEST_TIMES=10
+TEST_TIMES=3
 
 SERVER_IP=111.229.132.28
 SERVER_PORT=443
@@ -31,10 +31,12 @@ loss=(0 5 10 15 20)
 total_times=$((${#delay[@]} * ${#loss[@]} * $TEST_TIMES))
 
 # use netem to emulate the network
+cycle_cnt=0
 for i in ${delay[@]}
 do
     for j in ${loss[@]}
     do
+        cycle_cnt=$(($cycle_cnt + 1))
         echo "delay: $i ms, loss: $j %"
         sudo tc qdisc add dev eth0 root netem delay ${i}ms loss ${j}%
 
@@ -42,30 +44,32 @@ do
         # http1.1
         output_file="$H1_dir/delay_${i}_loss_${j}.csv"
         echo $output_header > $output_file
+
+        # output current progress
+        echo "progress http1.1: $cycle_cnt / $total_times"
         for k in $(seq 1 $TEST_TIMES)
         do
             # show a process bar
-            echo  ">>> progress: $((k + (j + i * ${#loss[@]}) * $TEST_TIMES)) / $total_times"
             curl --http1.1 -k https://$SERVER_IP:80/$TEST_OBJECT -w "$output_format" -o /dev/null >> $output_file
         done
 
         # http2
         output_file="$H2_dir/delay_${i}_loss_${j}.csv"
         echo $output_header > $output_file
+        echo "progress http2: $cycle_cnt / $total_times"
         for k in $(seq 1 $TEST_TIMES)
         do
             # show a process bar
-            echo  ">>> progress: $((k + (j + i * ${#loss[@]}) * $TEST_TIMES)) / $total_times"
             curl --http2 -k https://$SERVER_IP:$SERVER_PORT/$TEST_OBJECT -w "$output_format" -o /dev/null >> $output_file
         done
 
         # http3
         output_file="$H3_dir/delay_${i}_loss_${j}.csv"
         echo $output_header > $output_file
+        echo "progress http3: $cycle_cnt / $total_times"
         for k in $(seq 1 $TEST_TIMES)
         do
             # show a process bar
-            echo  ">>> progress: $((k + (j + i * ${#loss[@]}) * $TEST_TIMES)) / $total_times"
             curl --http3-only -k https://$SERVER_IP:$SERVER_PORT/$TEST_OBJECT -w "$output_format" -o /dev/null >> $output_file
         done
 
