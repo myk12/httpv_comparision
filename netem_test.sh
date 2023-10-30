@@ -22,10 +22,10 @@ output_header="time_namelookup,time_connect,time_appconnect,time_pretransfer,tim
 output_format="%{time_namelookup},%{time_connect},%{time_appconnect},%{time_pretransfer},%{time_starttransfer},%{time_total}\n"
 
 # delay array (ms)
-delay=(0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150)
+delay=(0 50 100 150 200 250 300)
 
 # loss array (%)
-loss=(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
+loss=(0 5 10 15 20)
 
 # total test times
 total_times=$((${#delay[@]} * ${#loss[@]} * $TEST_TIMES))
