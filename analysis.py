@@ -78,6 +78,35 @@ class HTTP_COMP:
             axs[i].legend()
 
         plt.savefig('delay_comparision.png')
+    
+    def plot_loss_comparision(self):
+        # plot http1.1 http2 http3 loss comparision accrording to delay and loss array
+
+        # plot subplots in a row, the number of subplots is the size of delay_array
+        # every subplot contains http1.1 http2 http3 comparision
+        fig, axs = plt.subplots(1, len(self.delay_array), figsize=(5*len(self.delay_array), 5))
+
+        for i in range(len(self.delay_array)):
+            delay = self.delay_array[i]
+            http1_loss = []
+            http2_loss = []
+            http3_loss = []
+
+            for j in range(len(self.loss_array)):
+                loss = self.loss_array[j]
+                http1_loss.append(self.http1[(delay, loss)]['time_total'].mean())
+                http2_loss.append(self.http2[(delay, loss)]['time_total'].mean())
+                http3_loss.append(self.http3[(delay, loss)]['time_total'].mean())
+            
+            axs[i].plot(self.loss_array, http1_loss, label='http1.1')
+            axs[i].plot(self.loss_array, http2_loss, label='http2')
+            axs[i].plot(self.loss_array, http3_loss, label='http3')
+            axs[i].set_title('delay = ' + str(delay) + 'ms')
+            axs[i].set_xlabel('loss (%)')
+            axs[i].set_ylabel('completion time (s)')
+            axs[i].legend()
+
+        plt.savefig('loss_comparision.png')
 
 if __name__ == '__main__':
     # Parse arguments
@@ -89,3 +118,4 @@ if __name__ == '__main__':
     http_comp = HTTP_COMP()
     http_comp.load_data(dir=args.dir)
     http_comp.plot_delay_comparision()
+    http_comp.plot_loss_comparision()
