@@ -12,6 +12,9 @@ class HTTP_COMP:
         self.http2 = {}
         self.http3 = {}
 
+        self.delay_array = []
+        self.loss_array = []
+
     def load_data(self, dir):
         subdirs = os.listdir(dir)
         for subdir in subdirs:
@@ -35,6 +38,11 @@ class HTTP_COMP:
                 delay = file.split('_')[1]
                 loss = file.split('_')[3].split('.')[0]
 
+                if delay not in self.delay_array:
+                    self.delay_array.append(delay)
+                if loss not in self.loss_array:
+                    self.loss_array.append(loss)
+
                 if protocol == 'http1.1':
                     self.http1[(delay, loss)] = df
                 elif protocol == 'http2':
@@ -43,32 +51,32 @@ class HTTP_COMP:
                     self.http3[(delay, loss)] = df
     
     def plot_delay_comparision(self):
-        # plot http1.1 http2 http3 delay comparision
-        delay_array = [0, 50, 100, 150, 200, 250, 300]
-        loss_array = [0, 5, 10, 15, 20]
+        # plot http1.1 http2 http3 delay comparision accrording to delay and loss array
 
-        # plot five subplots of loss = 0, 5, 10, 15, 20
+        # plot subplots in a row, the number of subplots is the size of loss_array
         # every subplot contains http1.1 http2 http3 comparision
-        fig, axs = plt.subplots(1, 5, figsize=(20, 5))
+        fig, axs = plt.subplots(1, len(self.loss_array), figsize=(5*len(self.loss_array), 5))
 
-        for i in range(len(loss_array)):
-            loss = loss_array[i]
+        for i in range(len(self.loss_array)):
+            loss = self.loss_array[i]
             http1_delay = []
             http2_delay = []
             http3_delay = []
-            for j in range(len(delay_array)):
-                delay = delay_array[j]
-                http1_delay.append(self.http1[(str(delay), str(loss))]['time_total'].mean())
-                http2_delay.append(self.http2[(str(delay), str(loss))]['time_total'].mean())
-                http3_delay.append(self.http3[(str(delay), str(loss))]['time_total'].mean())
-            axs[i].plot(delay_array, http1_delay, label='http1.1')
-            axs[i].plot(delay_array, http2_delay, label='http2')
-            axs[i].plot(delay_array, http3_delay, label='http3')
+
+            for j in range(len(self.delay_array)):
+                delay = self.delay_array[j]
+                http1_delay.append(self.http1[(delay, loss)]['time_total'].mean())
+                http2_delay.append(self.http2[(delay, loss)]['time_total'].mean())
+                http3_delay.append(self.http3[(delay, loss)]['time_total'].mean())
+            
+            axs[i].plot(self.delay_array, http1_delay, label='http1.1')
+            axs[i].plot(self.delay_array, http2_delay, label='http2')
+            axs[i].plot(self.delay_array, http3_delay, label='http3')
             axs[i].set_title('loss = ' + str(loss) + '%')
             axs[i].set_xlabel('delay (ms)')
             axs[i].set_ylabel('completion time (s)')
             axs[i].legend()
-        
+
         plt.savefig('delay_comparision.png')
 
 if __name__ == '__main__':
